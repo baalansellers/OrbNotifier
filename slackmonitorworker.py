@@ -3,18 +3,20 @@ import threading, Queue, time
 from colorificworker import ColorificWorker
 
 OPCODE_DATA = (websocket.ABNF.OPCODE_TEXT, websocket.ABNF.OPCODE_BINARY)
-ALANTAG = '@usertag here'
 CHANNELALERT = '!channel'
 
 class SlackMonitorWorker(threading.Thread):
-    def __init__(self):
+    def __init__(self, token, userid, mac):
         super(SlackMonitorWorker, self).__init__()
         self.stoprequest = threading.Event()
+        self.token = token
+        self.userid = userid
+        self.mac = mac
         self.slack_json = self.slack_auth()
         #print self.slack_json
         self.ws = websocket.create_connection(self.slack_json['url'])
         self.alert_q = Queue.Queue()
-        self.cw = ColorificWorker(self.alert_q)
+        self.cw = ColorificWorker(self.alert_q, mac)
         self.cw.start()
 
     def run(self):
@@ -26,7 +28,7 @@ class SlackMonitorWorker(threading.Thread):
 
             if msg:
                 print(msg)
-                if ALANTAG in msg:
+                if self.userid in msg:
                     self.alert_q.put('alert_red')
 
                 if CHANNELALERT in msg:
@@ -40,7 +42,7 @@ class SlackMonitorWorker(threading.Thread):
 
     def slack_auth(self):
         url = 'https://slack.com/api/rtm.start?'
-        params = {'pretty':'1','token':'your slack api token here'}
+        params = {'pretty':'1','token':self.token}
         urlparams = urllib.urlencode(params)
         response = urllib2.urlopen(url+urlparams)
         data = response.read()

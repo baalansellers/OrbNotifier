@@ -1,7 +1,42 @@
+import os, json
 from slackmonitorworker import SlackMonitorWorker
 
 def main():
-    smw = SlackMonitorWorker()
+    if os.path.isfile('orbnotifier.config'):
+        with open('orbnotifier.config', 'r') as f:
+            conf = json.load(f)
+    else:
+        conf = {'token':'','userid':'','mac':''}
+        with open('orbnotifier.config', 'w') as f:
+            json.dump(conf, f)
+        print('No orbnotifier.config file found, I created one for you, please fill in the nessary data before running again.')
+        return
+
+    try:
+        if conf['token'] == '':
+            print('You seem to be missing a token, please add one to your orbnotifier.config file.')
+            return
+    except KeyError:
+        print('You seem to be missing a token, please add one to your orbnotifier.config file.')
+        return
+
+    try:
+        if conf['userid'] == '':
+            print('You seem to be missing a userid, please add one to your orbnotifier.config file.')
+            return
+    except KeyError:
+        print('You seem to be missing a userid, please add one to your orbnotifier.config file.')
+        return
+
+    try:
+        if conf['mac'] == '':
+            print('You seem to be missing a mac, please add one to your orbnotifier.config file.')
+            return
+    except KeyError:
+        print('You seem to be missing a mac, please add one to your orbnotifier.config file.')
+        return
+    
+    smw = SlackMonitorWorker(conf['token'], conf['userid'], conf['mac'])
     smw.start()
     while True:
         try:

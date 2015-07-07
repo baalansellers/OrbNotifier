@@ -1,7 +1,6 @@
 import pexpect, numpy
 import threading, Queue, time
 
-BULB = 'bulb MAC address here, include colons'
 SLEEP_SEC = 0.001
 
 def grange(start, stop, step):
@@ -30,10 +29,11 @@ class ColorificWorker(threading.Thread):
     PINK = numpy.array([255,0,102])
     WHITE = numpy.array([0,0,0])
 
-    def __init__(self, notification_q):
+    def __init__(self, notification_q, mac):
         super(ColorificWorker, self).__init__()
         self.notification_q = notification_q
         self.stoprequest = threading.Event()
+        self.mac = mac
         self.currentcolor = ColorificWorker.WHITE
         self.faderorder = [ColorificWorker.RED, ColorificWorker.ORANGE, ColorificWorker.YELLOW, ColorificWorker.GREEN, ColorificWorker.AQUA, ColorificWorker.SKYBLUE, ColorificWorker.BLUE, ColorificWorker.PURPLE, ColorificWorker.FUCHSIA, ColorificWorker.PINK]
         self.currentfadecolor = ColorificWorker.RED
@@ -73,7 +73,7 @@ class ColorificWorker(threading.Thread):
 
     def bulb_connect(self):
         self.gatt = pexpect.spawn('gatttool -I')
-        self.gatt.sendline('connect {0}'.format(BULB))
+        self.gatt.sendline('connect {0}'.format(self.mac))
         try:
             self.gatt.expect(['successful','[CON]'])
         except EOF:
