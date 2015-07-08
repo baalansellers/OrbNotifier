@@ -35,6 +35,8 @@ def main():
     except KeyError:
         print('You seem to be missing a mac, please add one to your orbnotifier.config file.')
         return
+
+    print('Press Ctrl+C to stop service.')
     
     smw = SlackMonitorWorker(conf['token'], conf['userid'], conf['mac'])
     smw.start()

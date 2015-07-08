@@ -27,12 +27,20 @@ class SlackMonitorWorker(threading.Thread):
                 msg = "< %s" % data
 
             if msg:
-                print(msg)
-                if self.userid in msg:
-                    self.alert_q.put('alert_red')
-
-                if CHANNELALERT in msg:
-                    self.alert_q.put('alert_red')
+                #print(msg)
+                try:
+                    if self.userid in msg:
+                        self.alert_q.put('alert_red')
+                except UnicodeDecodeError:
+                    print('Unicode Decode Error while searching msg for userid.')
+                    continue
+                
+                try:
+                    if CHANNELALERT in msg:
+                        self.alert_q.put('alert_red')
+                except UnicodeDecodeError:
+                    print('Unicode Decode Error while searching msg for CHANNELALERT.')
+                    continue
 
     def close(self, timeout=None):
         self.ws.close()
