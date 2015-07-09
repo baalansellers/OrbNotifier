@@ -1,5 +1,5 @@
 # OrbNotifier
-Bluetooth RGB LED bulb that notifies (blinks) on mentions of your user id (@username) or @channel.
+Bluetooth RGB LED bulb integrated with Slack so that it notifies (blinks) on mentions of your user id (@username) or @channel.
 
 ##Configuration:
   - Requst an API key/token from Slack: https://api.slack.com/web
