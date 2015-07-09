@@ -114,7 +114,8 @@ class ColorificWorker(threading.Thread):
     def alert_red(self):
         self.alerton = 1
         for x in range(20):
-            self.color_shift(ColorificWorker.RED)
+            self.color_change(ColorificWorker.RED)
             time.sleep(SLEEP_SEC)
-            self.color_shift(ColorificWorker.YELLOW)
+            self.color_change(ColorificWorker.YELLOW)
+        self.color_shift(self.currentfadecolor)
         self.alerton = 0

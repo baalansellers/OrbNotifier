@@ -36,13 +36,21 @@ def main():
         print('You seem to be missing a mac, please add one to your orbnotifier.config file.')
         return
 
-    print('Press Ctrl+C to stop service.')
+    print('Type quit or exit to stop service.')
     
     smw = SlackMonitorWorker(conf['token'], conf['userid'], conf['mac'])
     smw.start()
     while True:
         try:
-            test = 1
+            msgin = raw_input()
+            if msgin == 'quit':
+                smw.close()
+                print('Goodbye!')
+                return
+            if msgin == 'exit':
+                smw.close()
+                print('Goodbye!')
+                return
         except KeyboardInterrupt:
             print('keyboard interrupt')
             smw.close()
