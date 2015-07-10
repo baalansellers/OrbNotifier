@@ -39,6 +39,12 @@ class SlackMonitorWorker(threading.Thread):
             if msg:
                 #print(msg)
                 try:
+                    with open('slackmsg.log','a') as f:
+                        f.write(msg + '\n')
+                except:
+                    pass
+                
+                try:
                     if self.userid in msg:
                         self.alert_q.put('alert_red')
                 except UnicodeDecodeError:
