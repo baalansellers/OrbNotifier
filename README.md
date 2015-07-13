@@ -1,12 +1,11 @@
 # OrbNotifier
-Bluetooth RGB LED bulb integrated with Slack so that it notifies (blinks) on mentions of your user id (@username) or @channel. You can find a full write-up of the project here: http://alansellers.net/projects/slack-orb-notifier/
+Bluetooth RGB LED bulb integrated with Slack so that it notifies (blinks) on mentions of your user id (@username), @channel, or private message. You can find a full write-up of the project here: http://alansellers.net/projects/slack-orb-notifier/
 
 ##Configuration:
   - Requst an API key/token from Slack: https://api.slack.com/web
   - Test out your token with the rtm.start API call: https://api.slack.com/methods/rtm.start/test
-  - Search for and note your user id, in the returned JSON from rtm.start: self.id
   - Find your Colorific Bulb's MAC address: `sudo hcitool lescan`
-  - Create a text file in the same folder as the .py files. Name it orbnotifier.config with the following contents: `{"token": "[your Slack token]", "userid": "@[your user id]", "mac": "[your bulb's mac address]"}`    (i.e. `{"token": "xoxp-1111111111-2222222222-3333333333-ab123c", "userid": "@Abc1234d", "mac": "AA:BB:CC:DD:11:22"}`)
+  - Create a text file in the same folder as the .py files. Name it orbnotifier.config with the following contents: `{"token": "[your Slack token]", "mac": "[your bulb's mac address]"}`    (i.e. `{"token": "xoxp-1111111111-2222222222-3333333333-ab123c", "mac": "AA:BB:CC:DD:11:22"}`)
 
 ##Run:
 
