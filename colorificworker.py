@@ -48,8 +48,10 @@ class ColorificWorker(threading.Thread):
         while not self.stoprequest.isSet():
             try:
                 cmd = self.notification_q.get(True, 0.05)
-                if cmd == 'alert_red':
-                    self.alert_red()
+                if cmd == 'alert_mention':
+                    self.alert_mention()
+                if cmd == 'alert_im':
+                    self.alert_im()
 
             except Queue.Empty:
                 curtime = int(time.time())
@@ -111,11 +113,20 @@ class ColorificWorker(threading.Thread):
         self.color_shift(self.faderorder[fi])
         self.currentfadecolor = self.faderorder[fi]
 
-    def alert_red(self):
+    def alert_mention(self):
         self.alerton = 1
         for x in range(20):
             self.color_change(ColorificWorker.RED)
             time.sleep(SLEEP_SEC)
             self.color_change(ColorificWorker.YELLOW)
+        self.color_shift(self.currentfadecolor)
+        self.alerton = 0
+
+    def alert_im(self):
+        self.alerton = 1
+        for x in range(20):
+            self.color_change(ColorificWorker.BLUE)
+            time.sleep(SLEEP_SEC)
+            self.color_change(ColorificWorker.GREEN)
         self.color_shift(self.currentfadecolor)
         self.alerton = 0

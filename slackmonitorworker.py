@@ -5,15 +5,16 @@ from colorificworker import ColorificWorker
 OPCODE_DATA = (websocket.ABNF.OPCODE_TEXT, websocket.ABNF.OPCODE_BINARY)
 CHANNELALERT = '!channel'
 
-def CleanStrUnicode(targetstr):
-    return ''.join([i if ord(i) < 128 else '' for i in targetstr])
+def CleanMsgUnicode(targetstr):
+    if not targetstr.startswith('{"type":'): return None
+    return ''.join([i if ord(i) < 128 else '' for i in targetstr]).replace('\n','')
 
 class SlackMonitorWorker(threading.Thread):
     def __init__(self, token, userid, mac):
         super(SlackMonitorWorker, self).__init__()
         self.stoprequest = threading.Event()
         self.token = token
-        self.userid = CleanStrUnicode(userid)
+        self.userid = userid
         self.mac = mac
         self.slack_json = self.slack_auth()
         #print self.slack_json
@@ -34,19 +35,22 @@ class SlackMonitorWorker(threading.Thread):
                 return
             msg = None
             if opcode in OPCODE_DATA:
-                msg = CleanStrUnicode(data)
-
-            if msg:
-                #print(msg)
+                msg = CleanMsgUnicode(data)
                 try:
                     with open('slackmsg.log','a') as f:
                         f.write(msg + '\n')
                 except:
                     pass
-                
+
+            if msg:
+                #print(msg)
                 try:
-                    if self.userid in msg:
-                        self.alert_q.put('alert_red')
+                    msgj = json.loads(msg)
+                    if msgj['type'] == 'message':
+                        if self.userid in str(msgj['text']):
+                            self.alert_q.put('alert_mention')
+                        if self.is_channel_im(str(msgj['channel'])):
+                            self.alert_q.put('alert_im')
                 except UnicodeDecodeError:
                     print('Unicode Decode Error while searching msg for userid.')
                     print('userid: {0}'.format(self.userid))
@@ -61,6 +65,11 @@ class SlackMonitorWorker(threading.Thread):
                     continue
 
     def close(self, timeout=None):
+        try:
+            with open('slackmsg.log','a') as f:
+                f.write('SERVICE CLOSED\n')
+        except:
+            pass
         self.ws.close()
         self.cw.close()
         self.stoprequest.set()
@@ -74,6 +83,11 @@ class SlackMonitorWorker(threading.Thread):
         data = response.read()
         startrsp = data.decode('utf-8')
         return json.loads(startrsp)
+
+    def is_channel_im(self, channelid):
+        for im in self.slack_json['ims']:
+            if channelid == im['id']: return True
+        return False
 
     def recv(self):
         frame = self.ws.recv_frame()
