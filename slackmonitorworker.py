@@ -10,13 +10,13 @@ def CleanMsgUnicode(targetstr):
     return ''.join([i if ord(i) < 128 else '' for i in targetstr]).replace('\n','')
 
 class SlackMonitorWorker(threading.Thread):
-    def __init__(self, token, userid, mac):
+    def __init__(self, token, mac):
         super(SlackMonitorWorker, self).__init__()
         self.stoprequest = threading.Event()
         self.token = token
-        self.userid = userid
         self.mac = mac
         self.slack_json = self.slack_auth()
+        self.userid = self.slack_json['self']['id']
         #print self.slack_json
         self.ws = websocket.create_connection(self.slack_json['url'])
         self.alert_q = Queue.Queue()
@@ -47,9 +47,11 @@ class SlackMonitorWorker(threading.Thread):
                 try:
                     msgj = json.loads(msg)
                     if msgj['type'] == 'message':
-                        if self.userid in str(msgj['text']):
+                        if 'text' in msgj and self.userid in str(msgj['text']):
                             self.alert_q.put('alert_mention')
-                        if self.is_channel_im(str(msgj['channel'])):
+                        if 'text' in msgj and 'user' in msgj and CHANNELALERT in str(msgj['text']) and self.userid not in str(msgj['user']):
+                            self.alert_q.put('alert_channel')
+                        if 'channel' in msgj and 'user' in msgj and self.is_channel_im(str(msgj['channel'])) and self.userid not in str(msgj['user']):
                             self.alert_q.put('alert_im')
                 except UnicodeDecodeError:
                     print('Unicode Decode Error while searching msg for userid.')

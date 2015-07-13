@@ -6,7 +6,7 @@ def main():
         with open('orbnotifier.config', 'r') as f:
             conf = json.load(f)
     else:
-        conf = {'token':'','userid':'','mac':''}
+        conf = {'token':'','mac':''}
         with open('orbnotifier.config', 'w') as f:
             json.dump(conf, f)
         print('No orbnotifier.config file found, I created one for you, please fill in the nessary data before running again.')
@@ -21,14 +21,6 @@ def main():
         return
 
     try:
-        if conf['userid'] == '':
-            print('You seem to be missing a userid, please add one to your orbnotifier.config file.')
-            return
-    except KeyError:
-        print('You seem to be missing a userid, please add one to your orbnotifier.config file.')
-        return
-
-    try:
         if conf['mac'] == '':
             print('You seem to be missing a mac, please add one to your orbnotifier.config file.')
             return
@@ -38,7 +30,7 @@ def main():
 
     print('Type quit or exit to stop service.')
     
-    smw = SlackMonitorWorker(conf['token'], conf['userid'], conf['mac'])
+    smw = SlackMonitorWorker(conf['token'], conf['mac'])
     smw.start()
     while True:
         try:

@@ -52,6 +52,8 @@ class ColorificWorker(threading.Thread):
                     self.alert_mention()
                 if cmd == 'alert_im':
                     self.alert_im()
+                if cmd == 'alert_channel':
+                    self.alert_channel()
 
             except Queue.Empty:
                 curtime = int(time.time())
@@ -128,5 +130,14 @@ class ColorificWorker(threading.Thread):
             self.color_change(ColorificWorker.BLUE)
             time.sleep(SLEEP_SEC)
             self.color_change(ColorificWorker.GREEN)
+        self.color_shift(self.currentfadecolor)
+        self.alerton = 0
+
+    def alert_channel(self):
+        self.alerton = 1
+        for x in range(20):
+            self.color_change(ColorificWorker.PINK)
+            time.sleep(SLEEP_SEC)
+            self.color_change(ColorificWorker.AQUA)
         self.color_shift(self.currentfadecolor)
         self.alerton = 0
