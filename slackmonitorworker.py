@@ -95,7 +95,7 @@ class SlackMonitorWorker(threading.Thread):
     def recv(self):
         try:
             frame = self.ws.recv_frame()
-        except SSLError:
+        except websocket.SSLError:
             self.log_msg('ERROR: SSLError while attempting to receive frame.')
         if not frame:
             raise websocket.WebSocketException("Not a valid frame {0}".format(frame))
