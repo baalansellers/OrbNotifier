@@ -1,5 +1,6 @@
 import websocket, json, urllib, urllib2
 import threading, Queue, time
+from time import strftime
 from colorificworker import ColorificWorker
 
 OPCODE_DATA = (websocket.ABNF.OPCODE_TEXT, websocket.ABNF.OPCODE_BINARY)
@@ -36,11 +37,7 @@ class SlackMonitorWorker(threading.Thread):
             msg = None
             if opcode in OPCODE_DATA:
                 msg = CleanMsgUnicode(data)
-                try:
-                    with open('slackmsg.log','a') as f:
-                        f.write(msg + '\n')
-                except:
-                    pass
+                self.log_msg(msg)
 
             if msg:
                 #print(msg)
@@ -67,11 +64,7 @@ class SlackMonitorWorker(threading.Thread):
                     continue
 
     def close(self, timeout=None):
-        try:
-            with open('slackmsg.log','a') as f:
-                f.write('SERVICE CLOSED\n')
-        except:
-            pass
+        self.log_msg('SERVICE CLOSED')
         self.ws.close()
         self.cw.close()
         self.stoprequest.set()
@@ -91,8 +84,19 @@ class SlackMonitorWorker(threading.Thread):
             if channelid == im['id']: return True
         return False
 
+    def log_msg(self, msg):
+        try:
+            with open('slackmsg.log','a') as f:
+                curtime = strftime("%Y%m%d-%H:%M:%S - ", time.localtime())
+                f.write(curtime + msg + '\n')
+        except:
+            pass
+
     def recv(self):
-        frame = self.ws.recv_frame()
+        try:
+            frame = self.ws.recv_frame()
+        except SSLError:
+            self.log_msg('ERROR: SSLError while attempting to receive frame.')
         if not frame:
             raise websocket.WebSocketException("Not a valid frame {0}".format(frame))
         elif frame.opcode in OPCODE_DATA:
