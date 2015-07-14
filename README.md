@@ -1,4 +1,4 @@
-# OrbNotifier
+# Slack OrbNotifier
 Bluetooth RGB LED bulb integrated with Slack so that it notifies (blinks) on mentions of your user id (@username), @channel, or private message. You can find a full write-up of the project here: http://alansellers.net/projects/slack-orb-notifier/
 
 ##Configuration:
