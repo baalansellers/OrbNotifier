@@ -46,10 +46,13 @@ class SlackMonitorWorker(threading.Thread):
                     if msgj['type'] == 'message':
                         if 'text' in msgj and self.userid in str(msgj['text']):
                             self.alert_q.put('alert_mention')
+                            self.log_msg('ALERT_MENTION')
                         if 'text' in msgj and 'user' in msgj and CHANNELALERT in str(msgj['text']) and self.userid not in str(msgj['user']):
                             self.alert_q.put('alert_channel')
+                            self.log_msg('ALERT_CHANNEL')
                         if 'channel' in msgj and 'user' in msgj and self.is_channel_im(str(msgj['channel'])) and self.userid not in str(msgj['user']):
                             self.alert_q.put('alert_im')
+                            self.log_msg('ALERT_IM')
                 except UnicodeDecodeError:
                     print('Unicode Decode Error while searching msg for userid.')
                     print('userid: {0}'.format(self.userid))
@@ -95,18 +98,18 @@ class SlackMonitorWorker(threading.Thread):
     def recv(self):
         try:
             frame = self.ws.recv_frame()
+            if not frame:
+                raise websocket.WebSocketException("Not a valid frame {0}".format(frame))
+            elif frame.opcode in OPCODE_DATA:
+                return (frame.opcode, frame.data)
+            elif frame.opcode == websocket.ABNF.OPCODE_CLOSE:
+                self.ws.send_close()
+                return (frame.opcode, None)
+            elif frame.opcode == websocket.ABNF.OPCODE_PING:
+                self.ws.pong("Hi!")
         except websocket.SSLError:
             self.log_msg('ERROR: SSLError while attempting to receive frame.')
-        if not frame:
-            raise websocket.WebSocketException("Not a valid frame {0}".format(frame))
-        elif frame.opcode in OPCODE_DATA:
-            return (frame.opcode, frame.data)
-        elif frame.opcode == websocket.ABNF.OPCODE_CLOSE:
-            self.ws.send_close()
-            return (frame.opcode, None)
-        elif frame.opcode == websocket.ABNF.OPCODE_PING:
-            self.ws.pong("Hi!")
-
+            
         return None, None
 
     
